@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L5U1 假期综合症 - 词汇索引</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: #f7f7f7;
+        }
+        .word-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .word-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            background-color: #f3e8ff; /* 淡紫色背景 */
+        }
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+        @media (min-width: 640px) {
+            .word-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+        }
+        @media (min-width: 768px) {
+            .word-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // 词汇数据 - 与index.html保持一致
+        const vocabularyData = [
+            { id: 1, word: "调整", pinyin: "tiáo zhěng", partOfSpeech: "动词", meaning: "to adjust, to regulate", category: "part2" },
+            { id: 2, word: "过渡", pinyin: "guò dù", partOfSpeech: "名词/动词", meaning: "transition, to transition", category: "part2" },
+            { id: 3, word: "有效", pinyin: "yǒu xiào", partOfSpeech: "形容词", meaning: "effective, valid", category: "part2" },
+            { id: 4, word: "现象", pinyin: "xiàn xiàng", partOfSpeech: "名词", meaning: "phenomenon, appearance", category: "part2" },
+            { id: 5, word: "实现", pinyin: "shí xiàn", partOfSpeech: "动词", meaning: "to realize, to achieve", category: "part2" },
+            { id: 6, word: "转换", pinyin: "zhuǎn huàn", partOfSpeech: "动词", meaning: "to transform, to convert", category: "part2" },
+            { id: 7, word: "利用", pinyin: "lì yòng", partOfSpeech: "动词", meaning: "to utilize, to make use of", category: "part2" },
+            { id: 8, word: "心中有数", pinyin: "xīn zhōng yǒu shù", partOfSpeech: "成语/固定短语", meaning: "to have a clear idea", category: "part2" },
+            { id: 9, word: "宅", pinyin: "zhái", partOfSpeech: "动词", meaning: "to stay at home, to be a homebody", category: "part1" },
+            { id: 10, word: "适应", pinyin: "shì yìng", partOfSpeech: "动词", meaning: "to adapt, to get used to", category: "part1" },
+            { id: 11, word: "综合", pinyin: "zōng hé", partOfSpeech: "形容词/动词", meaning: "comprehensive, to synthesize", category: "part1" },
+            { id: 12, word: "倾诉", pinyin: "qīng sù", partOfSpeech: "动词", meaning: "to pour out one's heart, to confide", category: "part1" },
+            { id: 13, word: "恐惧", pinyin: "kǒng jù", partOfSpeech: "名词/动词", meaning: "fear, to fear", category: "part1" },
+            { id: 14, word: "即将", pinyin: "jí jiāng", partOfSpeech: "副词", meaning: "about to, soon", category: "part1" },
+            { id: 15, word: "沉浸", pinyin: "chén jìn", partOfSpeech: "动词", meaning: "to immerse, to be absorbed in", category: "part1" },
+            { id: 16, word: "文件", pinyin: "wén jiàn", partOfSpeech: "名词", meaning: "document, file", category: "part1" },
+            { id: 17, word: "烦躁", pinyin: "fán zào", partOfSpeech: "形容词", meaning: "irritable, restless", category: "part1" },
+        ];
+
+        function VocabularyGallery() {
+            const [category, setCategory] = React.useState('all');
+            const [showPinyin, setShowPinyin] = React.useState(true);
+            const [showTranslation, setShowTranslation] = React.useState(true);
+
+            // 处理卡片点击
+            const handleCardClick = (id) => {
+                window.location.href = `index.html?word=${id}`;
+            };
+
+            const filteredVocabulary = category === 'all' 
+                ? vocabularyData 
+                : vocabularyData.filter(item => item.category === category);
+
+            return (
+                <div className="container mx-auto px-4 py-8">
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-bold text-gray-800">L5U1 假期综合症 - 词汇索引</h1>
+                        <a href="index.html" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition duration-300">
+                            返回闪卡模式
+                        </a>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                        <div className="flex flex-wrap justify-between items-center mb-4">
+                            <div className="flex flex-wrap space-x-2 mb-4 sm:mb-0">
+                                <button 
+                                    className={`px-4 py-2 rounded-lg transition duration-300 mb-2 ${category === 'all' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                    onClick={() => setCategory('all')}
+                                >
+                                    全部词汇
+                                </button>
+                                <button 
+                                    className={`px-4 py-2 rounded-lg transition duration-300 mb-2 ${category === 'part1' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                    onClick={() => setCategory('part1')}
+                                >
+                                    第一部分
+                                </button>
+                                <button 
+                                    className={`px-4 py-2 rounded-lg transition duration-300 mb-2 ${category === 'part2' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                    onClick={() => setCategory('part2')}
+                                >
+                                    第二部分
+                                </button>
+                            </div>
+                            
+                            <div className="flex flex-wrap space-x-4">
+                                <label className="inline-flex items-center mb-2">
+                                    <input 
+                                        type="checkbox" 
+                                        className="form-checkbox h-5 w-5 text-purple-600" 
+                                        checked={showPinyin} 
+                                        onChange={() => setShowPinyin(!showPinyin)}
+                                    />
+                                    <span className="ml-2 text-gray-700">显示拼音</span>
+                                </label>
+                                <label className="inline-flex items-center mb-2">
+                                    <input 
+                                        type="checkbox" 
+                                        className="form-checkbox h-5 w-5 text-purple-600" 
+                                        checked={showTranslation} 
+                                        onChange={() => setShowTranslation(!showTranslation)}
+                                    />
+                                    <span className="ml-2 text-gray-700">显示翻译</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                            <p className="text-gray-600">共 {filteredVocabulary.length} 个词汇</p>
+                        </div>
+                    </div>
+
+                    <div className="word-grid">
+                        {filteredVocabulary.map(item => (
+                            <div 
+                                key={item.id} 
+                                className="word-card bg-white rounded-lg shadow-md overflow-hidden p-3"
+                                onClick={() => handleCardClick(item.id)}
+                            >
+                                <div className="flex justify-between items-start">
+                                    <h2 className="text-xl font-bold">{item.word}</h2>
+                                    <span className={`text-xs px-1 py-0.5 rounded-full ${item.category === 'part1' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}>
+                                        {item.category === 'part1' ? '1' : '2'}
+                                    </span>
+                                </div>
+                                {showPinyin && <p className="text-sm text-gray-600">{item.pinyin}</p>}
+                                <p className="text-xs text-gray-500">{item.partOfSpeech}</p>
+                                {showTranslation && <p className="text-sm text-gray-700">{item.meaning}</p>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<VocabularyGallery />, document.getElementById('root'));
+    </script>
+</body>
+</html>
+

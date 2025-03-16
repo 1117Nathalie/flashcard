@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>对外汉语电子词卡</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.10/babel.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+        }
+        .card-container {
+            perspective: 1000px;
+        }
+        .transition-state {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .card-gradient-1 {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .card-gradient-2 {
+            background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%);
+        }
+        .word-grid-item {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .word-grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root" class="min-h-screen flex items-center justify-center py-8 px-4"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // 词汇数据库 - 包含所有词汇
+        const vocabularyData = [
+            // 新学词汇
+            {
+                id: 1,
+                word: '调整',
+                pinyin: 'tiáo zhěng',
+                partOfSpeech: '动词',
+                meaning: '改变使适合，使恰当',
+                example: '我需要调整一下作息时间。',
+                examplePinyin: 'Wǒ xūyào tiáozhěng yíxià zuòxí shíjiān.',
+                exampleTranslation: 'I need to adjust my daily schedule.',
+                image: '/api/placeholder/300/200',
+                isNew: true
+            },
+            {
+                id: 2,
+                word: '过渡',
+                pinyin: 'guò dù',
+                partOfSpeech: '名词/动词',
+                meaning: '从一种状态到另一种状态的转变过程',
+                example: '假期和工作之间需要一个过渡期。',
+                examplePinyin: 'Jiàqī hé gōngzuò zhījiān xūyào yí gè guòdù qī.',
+                exampleTranslation: 'We need a transition period between holidays and work.',
+                image: '/api/placeholder/300/200',
+                isNew: true
+            },
+            {
+                id: 3,
+                word: '有效',
+                pinyin: 'yǒu xiào',
+                partOfSpeech: '形容词',
+                meaning: '能够达到预期目的的，产生预期效果的',
+                example: '这是一种有效的学习方法。',
+                examplePinyin: 'Zhè shì yì zhǒng yǒuxiào de xuéxí fāngfǎ.',
+                exampleTranslation: 'This is an effective learning method.',
+                image: '/api/placeholder/300/200',
+                isNew: true
+            },
+            {
+                id: 4,
+                word: '现象',
+                pinyin: 'xiàn xiàng',
+                partOfSpeech: '名词',
+                meaning: '客观存在的事物表现或情况',
+                example: '假期结束后工作适应不良是常见现象。',
+                examplePinyin: 'Jiàqī jiéshù hòu gōngzuò shìyìng bùliáng shì chángjiàn xiànxiàng.',
+                exampleTranslation: 'Difficulty adapting to work after holidays is a common phenomenon.',
+                image: '/api/placeholder/300/200',
+                isNew: true
+            },
+            {
+                id: 5,
+                word: '实现',
+                pinyin: 'shí xiàn',
+                partOfSpeech: '动词',
+                meaning: '使计划、愿望等变为现实',
+                example: '他实现了自己的梦想。',
+                examplePinyin: 'Tā shíxiàn le zìjǐ de mèngxiǎng.',
+                exampleTranslation: 'He realized his dream.',
+                image: '/api/placeholder/300/200',
+                isNew: true
+            },
+            {
+                id: 6,
+                word: '转换',
+                pinyin: 'zhuǎn huàn',
+                partOfSpeech: '动词',
+                meaning: '从一种状态、形式改变到另一种',
+                example: '我们需要转换一下心情。',
+                examplePinyin: 'Wǒmen xūyào zhuǎnhuàn yíxià xīnqíng.',
+                exampleTranslation: 'We need to change our mood.',
+                image: '/api/placeholder/300/200',
+                isNew: true
+            },
+            {
+                id: 7,
+                word: '利用',
+                pinyin: 'lì yòng',
+                partOfSpeech: '动词',
+                meaning: '使用、运用（资源、时间等）',
+                example: '利用假期的最后一天准备工作。',
+                examplePinyin: 'Lìyòng jiàqī de zuìhòu yì tiān zhǔnbèi gōngzuò.',
+                exampleTranslation: 'Use the last day of vacation to prepare for work.',
+                image: '/api/placeholder/300/200',
+                isNew: true
+            },
+            {
+                id: 8,
+                word: '心中有数',
+                pinyin: 'xīn zhōng yǒu shù',
+                partOfSpeech: '成语/固定短语',
+                meaning: '心里有把握，对情况了解清楚',
+                example: '做事前要心中有数。',
+                examplePinyin: 'Zuò shì qián yào xīnzhōng yǒushù.',
+                exampleTranslation: 'Be clear about what you are doing before you start.',
+                image: '/api/placeholder/300/200',
+                isNew: true
+            },
+            
+            // 复习词汇
+            {
+                id: 9,
+                word: '宅',
+                pinyin: 'zhái',
+                partOfSpeech: '动词',
+                meaning: '在家不出门',
+                example: '"十一"黄金周期间，很多人选择旅游、探亲、逛街或是宅在家中。',
+                examplePinyin: '"Shíyī" huángjīn zhōuqí jiān, hěnduō rén xuǎnzé lǚyóu, tànqīn, guàngjiē huòshì zhái zài jiāzhōng.',
+                exampleTranslation: 'During the "Golden Week" of National Day, many people choose to travel, visit relatives, go shopping, or stay at home.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            },
+            {
+                id: 10,
+                word: '适应',
+                pinyin: 'shì yìng',
+                partOfSpeech: '动词',
+                meaning: '习惯于某种环境或情况',
+                example: '通常节假日过后，有些人会出现一些不适应的状况。',
+                examplePinyin: 'Tōngcháng jiéjiàrì guòhòu, yǒuxiē rén huì chūxiàn yìxiē bù shìyìng de zhuàngkuàng.',
+                exampleTranslation: 'Usually after holidays, some people will experience situations of not adapting well.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            },
+            {
+                id: 11,
+                word: '综合',
+                pinyin: 'zōng hé',
+                partOfSpeech: '形容词/动词',
+                meaning: '把不同的事物或方面结合起来',
+                example: '我们称之为假期综合征。',
+                examplePinyin: 'Wǒmen chēng zhī wéi jiàqī zōnghé zhēng.',
+                exampleTranslation: 'We call it holiday syndrome.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            },
+            {
+                id: 12,
+                word: '倾诉',
+                pinyin: 'qīng sù',
+                partOfSpeech: '动词',
+                meaning: '向别人诉说内心的想法',
+                example: '请听听下面几位朋友的倾诉吧。',
+                examplePinyin: 'Qǐng tīng tīng xiàmiàn jǐ wèi péngyǒu de qīngsù ba.',
+                exampleTranslation: 'Please listen to what several friends have to say.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            },
+            {
+                id: 13,
+                word: '恐惧',
+                pinyin: 'kǒng jù',
+                partOfSpeech: '名词/动词',
+                meaning: '非常害怕',
+                example: '我有上班恐惧症。',
+                examplePinyin: 'Wǒ yǒu shàngbān kǒngjù zhēng.',
+                exampleTranslation: 'I have work anxiety syndrome.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            },
+            {
+                id: 14,
+                word: '即将',
+                pinyin: 'jí jiāng',
+                partOfSpeech: '副词',
+                meaning: '很快就要',
+                example: '假期即将结束了。',
+                examplePinyin: 'Jiàqī jíjiāng jiéshù le.',
+                exampleTranslation: 'The holiday is about to end.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            },
+            {
+                id: 15,
+                word: '沉浸',
+                pinyin: 'chén jìn',
+                partOfSpeech: '动词',
+                meaning: '深入于某种环境或状态中',
+                example: '可我还沉浸在节日的快乐中。',
+                examplePinyin: 'Kě wǒ hái chénjìn zài jiérì de kuàilè zhōng.',
+                exampleTranslation: 'But I am still immersed in the joy of the holiday.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            },
+            {
+                id: 16,
+                word: '文件',
+                pinyin: 'wén jiàn',
+                partOfSpeech: '名词',
+                meaning: '书面材料',
+                example: '一想到上班时有那么多的文件要处理。',
+                examplePinyin: 'Yī xiǎngdào shàngbān shí yǒu nàme duō de wénjiàn yào chǔlǐ.',
+                exampleTranslation: 'Just thinking about all the documents that need to be processed when working.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            },
+            {
+                id: 17,
+                word: '烦躁',
+                pinyin: 'fán zào',
+                partOfSpeech: '形容词',
+                meaning: '情绪不安、急躁',
+                example: '那么多的会要开，我就会烦躁。',
+                examplePinyin: 'Nàme duō de huì yào kāi, wǒ jiù huì fánzào.',
+                exampleTranslation: 'With so many meetings to attend, I become irritable.',
+                image: '/api/placeholder/300/200',
+                isNew: false
+            }
+        ];
+
+        // 主应用组件
+        const App = () => {
+            const [view, setView] = useState('index'); // 'index' 或 'flashcard'
+            const [selectedWordId, setSelectedWordId] = useState(null);
+            const [wordType, setWordType] = useState('all'); // 'all', 'new', 'review'
+            const [showPinyinInIndex, setShowPinyinInIndex] = useState(false);
+
+            // 根据筛选条件过滤词汇
+            const filteredVocabulary = vocabularyData.filter(word => {
+                if (wordType === 'all') return true;
+                if (wordType === 'new') return word.isNew;
+                if (wordType === 'review') return !word.isNew;
+                return true;
+            });
+
+            // 切换到单词卡视图
+            const goToFlashcard = (wordId) => {
+                setSelectedWordId(wordId);
+                setView('flashcard');
+            };
+
+            // 返回索引视图
+            const goToIndex = () => {
+                setView('index');
+            };
+
+            // 根据视图渲染不同的内容
+            if (view === 'index') {
+                return <WordIndexView 
+                    vocabulary={filteredVocabulary} 
+                    onWordSelect={goToFlashcard} 
+                    wordType={wordType}
+                    onWordTypeChange={setWordType}
+                    showPinyin={showPinyinInIndex}
+                    onTogglePinyin={setShowPinyinInIndex}
+                />;
+            } else {
+                return <FlashcardView 
+                    vocabulary={filteredVocabulary} 
+                    initialWordId={selectedWordId} 
+                    onBack={goToIndex} 
+                />;
+            }
+        };
+
+        // 美观的索引视图组件 - 使用紫蓝色渐变背景
+        const WordIndexView = ({ vocabulary, onWordSelect, wordType, onWordTypeChange, showPinyin, onTogglePinyin }) => {
+            return (
+                <div className="w-full max-w-6xl mx-auto px-4">
+                    <h1 className="text-3xl font-bold text-center mb-6 text-purple-800">对外汉语词汇表</h1>
+                    
+                    <div className="mb-6 flex flex-wrap justify-between items-center">
+                        <div className="inline-flex rounded-md shadow-sm mb-2 sm:mb-0">
+                            <button 
+                                className={`px-4 py-2 text-sm font-medium border rounded-l-lg ${
+                                    wordType === 'all' 
+                                        ? 'bg-purple-600 text-white border-purple-600' 
+                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                                onClick={() => onWordTypeChange('all')}
+                            >
+                                所有词汇
+                            </button>
+                            <button 
+                                className={`px-4 py-2 text-sm font-medium border-t border-b ${
+                                    wordType === 'new' 
+                                        ? 'bg-purple-600 text-white border-purple-600' 
+                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                                onClick={() => onWordTypeChange('new')}
+                            >
+                                新词汇
+                            </button>
+                            <button 
+                                className={`px-4 py-2 text-sm font-medium border rounded-r-lg ${
+                                    wordType === 'review' 
+                                        ? 'bg-purple-600 text-white border-purple-600' 
+                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                                onClick={() => onWordTypeChange('review')}
+                            >
+                                复习词汇
+                            </button>
+                        </div>
+                        
+                        <label className="flex items-center text-sm">
+                            <input 
+                                type="checkbox" 
+                                checked={showPinyin} 
+                                onChange={() => onTogglePinyin(!showPinyin)}
+                                className="mr-2 form-checkbox h-4 w-4 text-purple-600"
+                            />
+                            显示拼音
+                        </label>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {vocabulary.map((word) => (
+                            <div 
+                                key={word.id}
+                                className="word-grid-item rounded-lg shadow-md cursor-pointer overflow-hidden"
+                                onClick={() => onWordSelect(word.id)}
+                            >
+                                <div className="card-gradient-1 h-24 flex flex-col items-center justify-center text-white p-2">
+                                    <span className="text-3xl font-medium">{word.word}</span>
+                                    {showPinyin && <span className="text-sm mt-1">{word.pinyin}</span>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {vocabulary.length === 0 && (
+                        <div className="text-center py-10">
+                            <p className="text-gray-500">没有找到符合条件的词汇</p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // 词卡学习视图组件
+        const FlashcardView = ({ vocabulary, initialWordId, onBack }) => {
+            // 找到初始单词的索引
+            const initialIndex = vocabulary.findIndex(word => word.id === initialWordId) || 0;
+            
+            const [currentIndex, setCurrentIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
+            const [cardState, setCardState] = useState(0); // 0: 图片, 1: 词语, 2: 详细信息
+            const [showPinyin, setShowPinyin] = useState(true);
+            const [showExampleTranslation, setShowExampleTranslation] = useState(false);
+
+            const currentWord = vocabulary[currentIndex];
+
+            // 处理卡片点击，循环切换三个状态
+            const handleCardClick = () => {
+                setCardState((prevState) => (prevState + 1) % 3);
+            };
+
+            // 切换到下一个词
+            const handleNext = () => {
+                setCardState(0); // 重置为图片状态
+                setCurrentIndex((prevIndex) => (prevIndex + 1) % vocabulary.length);
+            };
+
+            // 切换到上一个词
+            const handlePrevious = () => {
+                setCardState(0); // 重置为图片状态
+                setCurrentIndex((prevIndex) => (prevIndex - 1 + vocabulary.length) % vocabulary.length);
+            };
+
+            if (!currentWord) {
+                return (
+                    <div className="text-center py-10">
+                        <p className="text-gray-500">未找到词汇信息</p>
+                        <button 
+                            onClick={onBack}
+                            className="mt-4 bg-purple-700 hover:bg-purple-800 text-white py-2 px-6 rounded-lg shadow transition-colors"
+                        >
+                            返回词汇列表
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="w-full max-w-md mx-auto">
+                    <div className="flex items-center justify-between mb-6">
+                        <button 
+                            onClick={onBack}
+                            className="flex items-center text-purple-700 hover:text-purple-900 transition-colors"
+                        >
+                            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            返回词汇表
+                        </button>
+                        
+                        <div className="text-sm text-gray-600">
+                            {currentIndex + 1} / {vocabulary.length}
+                        </div>
+                    </div>
+                    
+                    <h1 className="text-2xl font-bold text-center mb-4 text-purple-800">对外汉语电子词卡</h1>
+                    
+                    <div className="mb-4 flex justify-end space-x-4">                        
+                        <div className="flex space-x-3">
+                            <label className="flex items-center text-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked={showPinyin} 
+                                    onChange={() => setShowPinyin(!showPinyin)}
+                                    className="mr-1 form-checkbox h-3 w-3"
+                                />
+                                拼音
+                            </label>
+                            <label className="flex items-center text-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked={showExampleTranslation} 
+                                    onChange={() => setShowExampleTranslation(!showExampleTranslation)}
+                                    className="mr-1 form-checkbox h-3 w-3"
+                                />
+                                翻译
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div 
+                        className="relative w-full h-80 rounded-lg shadow-lg cursor-pointer transition-transform duration-300 transform hover:scale-105 overflow-hidden card-container"
+                        onClick={handleCardClick}
+                    >
+                        {/* 第一层：图片 */}
+                        <div 
+                            className={`absolute w-full h-full rounded-lg transition-state ${
+                                cardState === 0 ? 'opacity-100 visible' : 'opacity-0 invisible'
+                            } card-gradient-1`}
+                        >
+                            <div className="flex flex-col items-center justify-center h-full text-white p-6">
+                                <img 
+                                    src={currentWord.image} 
+                                    alt={currentWord.word}
+                                    className="max-h-52 mb-4 rounded-md shadow-md"
+                                />
+                                <div className="absolute top-2 right-2">
+                                    <span className={`text-xs px-2 py-1 rounded-full ${currentWord.isNew ? 'bg-green-500' : 'bg-blue-500'}`}>
+                                        {currentWord.isNew ? '新词' : '复习'}
+                                    </span>
+                                </div>
+                                <p className="text-sm italic text-white">点击查看词语</p>
+                            </div>
+                        </div>
+                        
+                        {/* 第二层：词语 */}
+                        <div 
+                            className={`absolute w-full h-full rounded-lg transition-state ${
+                                cardState === 1 ? 'opacity-100 visible' : 'opacity-0 invisible'
+                            } card-gradient-2`}
+                        >
+                            <div className="flex flex-col items-center justify-center h-full text-white p-6">
+                                <h2 className="text-5xl font-bold mb-4">{currentWord.word}</h2>
+                                {showPinyin && <p className="text-2xl mb-6">{currentWord.pinyin}</p>}
+                                <div className="absolute top-2 right-2">
+                                    <span className={`text-xs px-2 py-1 rounded-full ${currentWord.isNew ? 'bg-green-500' : 'bg-blue-500'}`}>
+                                        {currentWord.isNew ? '新词' : '复习'}
+                                    </span>
+                                </div>
+                                <p className="text-sm italic">点击查看详细解释</p>
+                            </div>
+                        </div>
+                        
+                        {/* 第三层：详细信息 */}
+                        <div 
+                            className={`absolute w-full h-full rounded-lg bg-white p-6 transition-state ${
+                                cardState === 2 ? 'opacity-100 visible' : 'opacity-0 invisible'
+                            }`}
+                        >
+                            <div className="flex flex-col h-full">
+                                <div className="mb-2 flex justify-between items-start">
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-purple-800">{currentWord.word}</h3>
+                                        {showPinyin && <p className="text-md text-gray-600">{currentWord.pinyin}</p>}
+                                        <p className="text-sm text-gray-500">{currentWord.partOfSpeech}</p>
+                                    </div>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${currentWord.isNew ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}>
+                                        {currentWord.isNew ? '新词' : '复习'}
+                                    </span>
+                                </div>
+                                
+                                <div className="mb-3">
+                                    <p className="text-md"><span className="font-medium">释义：</span>{currentWord.meaning}</p>
+                                </div>
+                                
+                                <div className="mb-3">
+                                    <p className="text-md"><span className="font-medium">例句：</span>{currentWord.example}</p>
+                                    {showPinyin && <p className="text-sm text-gray-600 mt-1">{currentWord.examplePinyin}</p>}
+                                    {showExampleTranslation && <p className="text-sm text-gray-700 italic mt-1">{currentWord.exampleTranslation}</p>}
+                                </div>
+                                
+                                <p className="text-sm mt-auto italic text-center text-gray-500">点击回到图片</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-between mt-6">
+                        <button 
+                            onClick={handlePrevious}
+                            className="bg-purple-700 hover:bg-purple-800 text-white py-2 px-6 rounded-lg shadow transition-colors"
+                        >
+                            上一个
+                        </button>
+                        <button 
+                            onClick={handleNext}
+                            className="bg-purple-700 hover:bg-purple-800 text-white py-2 px-6 rounded-lg shadow transition-colors"
+                        >
+                            下一个
+                        </button>
+                    </div>
+                    
+                    <div className="mt-4 text-center text-sm text-gray-600">
+                        点击卡片切换：图片 → 词语 → 详细解释
+                    </div>
+                </div>
+            );
+        };
+
+        // 渲染应用
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
